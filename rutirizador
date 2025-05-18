@@ -1,0 +1,27 @@
+from fastapi import FastAPI
+from belvo_client import client
+
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"message": "Rutinizador bancario activo"}
+
+@app.get("/crear-enlace")
+def crear_enlace():
+    enlace = client.Links.create(
+        username="johndoe",
+        password="supersecret",
+        institution="mx_bank",
+        login_type="password"
+    )
+    return {"link_id": enlace["id"]}
+
+@app.get("/saldo/{link_id}")
+def obtener_saldo(link_id: str):
+    cuentas = client.Accounts.list(link=link_id)
+    for cuenta in cuentas:
+        return {
+            "nombre": cuenta["name"],
+            "saldo": cuenta["balance"]["available"]
+        }
